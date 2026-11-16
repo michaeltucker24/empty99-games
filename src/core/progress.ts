@@ -151,3 +151,60 @@ export function awardBadges(p: Progress, ids: string[]): { progress: Progress; e
   const earned = ids.filter((id) => !p.badges.includes(id));
   return { progress: { ...p, badges: [...p.badges, ...earned] }, earned };
 }
+
+// ---------- Merging two copies (this device + the account's saved copy) ----------
+
+const union = <T>(a: T[], b: T[]) => [...new Set([...a, ...b])];
+const maxMap = (a: Record<string, number>, b: Record<string, number>) => {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) out[k] = Math.max(out[k] ?? 0, v);
+  return out;
+};
+
+/**
+ * Combine progress from this browser with the copy saved to the player's account,
+ * so signing in on a second device never loses anything. Counters take the higher
+ * value, lists are joined, and the streak comes from whichever copy played last.
+ */
+export function mergeProgress(local: Progress, remote: Partial<Progress>): Progress {
+  const r: Progress = { ...empty(), ...remote, missions: { ...empty().missions, ...(remote.missions ?? {}) } };
+  const newer = (r.lastDailyDay ?? '') > (local.lastDailyDay ?? '') ? r : local;
+  const older = newer === r ? local : r;
+  let streak = newer.dailyStreak;
+  if (newer.lastDailyDay && older.lastDailyDay && older.dailyStreak > 0) {
+    // Two streaks that touch or overlap join up: phone yesterday + laptop today = one streak.
+    const newerStart = addDays(newer.lastDailyDay, -(newer.dailyStreak - 1));
+    const olderStart = addDays(older.lastDailyDay, -(older.dailyStreak - 1));
+    if (older.lastDailyDay >= addDays(newerStart, -1) && olderStart < newerStart) {
+      streak = daysBetween(olderStart, newer.lastDailyDay) + 1;
+    }
+  }
+  const sameMissionDay = local.missions.day === r.missions.day;
+  const missionsNewer = (r.missions.day ?? '') > (local.missions.day ?? '') ? r.missions : local.missions;
+  return {
+    ...local,
+    version: 2,
+    dailyStreak: streak,
+    lastDailyDay: newer.lastDailyDay,
+    bestDailyStreak: Math.max(local.bestDailyStreak, r.bestDailyStreak, streak),
+    dailyResults: { ...local.dailyResults, ...r.dailyResults, ...local.dailyResults },
+    bests: maxMap(local.bests, r.bests),
+    badges: union(local.badges, r.badges),
+    misses: [...local.misses, ...r.misses.filter((m) => !local.misses.some((n) => n.prompt === m.prompt))].slice(0, 40),
+    plays: Math.max(local.plays, r.plays),
+    xp: Math.max(local.xp, r.xp),
+    fuel: Math.max(local.fuel, r.fuel),
+    shields: Math.max(local.shields, r.shields),
+    shieldDays: union(local.shieldDays, r.shieldDays).sort().slice(-60),
+    playDays: union(local.playDays, r.playDays).sort().slice(-90),
+    stages: maxMap(local.stages, r.stages),
+    missions: sameMissionDay
+      ? { day: local.missions.day, progress: maxMap(local.missions.progress, r.missions.progress), claimed: union(local.missions.claimed, r.missions.claimed) }
+      : missionsNewer,
+    weeksClaimed: union(local.weeksClaimed, r.weeksClaimed),
+    skins: union(local.skins, r.skins),
+    skin: local.skin,
+    boostUntil: Math.max(local.boostUntil, r.boostUntil),
+    timeBoosts: Math.max(local.timeBoosts, r.timeBoosts),
+  };
+}
