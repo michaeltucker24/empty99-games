@@ -6,6 +6,7 @@ import { dailySeed, makeRng } from '../../../core/seed';
 import { dailyProblem, generate } from '../logic';
 import { useCountdown, useRound } from '../../../components/useRound';
 import { ComboPop, HeatMeter, Keypad, useAnim } from '../../../components/Pieces';
+import { Rocket } from '../../../components/Rocket';
 
 export interface RoundResult {
   score: number;
@@ -19,10 +20,11 @@ interface Props {
   seconds: number;
   topic: string;
   title?: string;
+  skin?: string;
   onDone: (r: RoundResult) => void;
 }
 
-export function Launch({ daily, seconds, topic, title, onDone }: Props) {
+export function Launch({ daily, seconds, topic, title, skin, onDone }: Props) {
   const next = useMemo(() => {
     if (daily) {
       const rng = makeRng(dailySeed('mental-math'));
@@ -64,8 +66,9 @@ export function Launch({ daily, seconds, topic, title, onDone }: Props) {
       <div className="sky" aria-hidden="true">
         <div className="stars" style={{ backgroundPositionY: `${altitude / 4}px` }} />
         <div className="rocket" style={{ bottom: `${rocketBottom}%` }}>
-          <span className={`ship ${boosting ? 'boost' : ''}`}>🚀</span>
-          {boosting && <span className="flame">🔥</span>}
+          <span className={`ship ${boosting ? 'boost' : ''}`}>
+            <Rocket skin={skin} size={30} flame={boosting} />
+          </span>
         </div>
         <div className="alt">{altitude.toLocaleString()} m</div>
       </div>

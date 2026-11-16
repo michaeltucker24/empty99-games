@@ -68,7 +68,7 @@ export function ComboPop({ combo, id }: { combo: number; id: number }) {
 
 export function Confetti({ go }: { go: boolean }) {
   if (!go) return null;
-  const colors = ['#FFD23F', '#2D6BFF', '#E24B4A', '#1D9E75', '#D4537E'];
+  const colors = ['#FFD23F', '#16161A', '#FF7A1A', '#5DCAA5', '#E24B4A'];
   return (
     <div className="confetti" aria-hidden="true">
       {Array.from({ length: 40 }, (_, i) => (

@@ -12,6 +12,8 @@ Plan and decisions live in the Empty 99 Studios claude.ai project: `claude/learn
 ## Layout
 - `src/core/`: shared engine (seeded RNG + daily seed, heat meter, progress/streaks/badges, share text + story card, sound, analytics, game contract).
 - `src/components/`: `useRound` (auto-submit answer engine + countdown) and UI pieces (keypad, heat meter, combo, confetti).
+- Progression (shared by every game): `core/progression.ts` (XP/levels, fuel, daily missions + supply crates, weekly challenge, fuel shop, rocket skins, flight path stages) over `core/progress.ts` (streak with streak shields). UI in `components/`: `CalcBot` (mascot, moods), `Chrome` (stat bar with tap-to-explain, tab bar with icon + label), `ProgressionPanels` (Path, Missions, Shop, level bar, reward strip), `Rocket` (skinnable SVG), `Icons`. A game supplies its sectors, mission pool and XP rules (Mental Math: `games/mental-math/path.ts`).
+- Look: yellow `#FFD23F`, ink `#16161A`, white; Archivo (condensed headings via `font-stretch`); 2–2.5 px ink outlines with hard offset shadows (`4px 4px 0`). Math symbols as icons (÷ Path, √ Missions, π Profile, + XP, Σ total XP), always with a word label. Keep it from looking like any one app (no rounded bubbly fonts, no 3D bottom-edge buttons, no gems/leagues/hearts naming).
 - `src/games/<slug>/`: one folder per game. `logic.ts` is pure and tested; modes in `modes/`; SEO copy in `content.ts`; one `GamePage.astro` template for hub + sub-topic pages.
 - `src/pages/<slug>/`: hub `index.astro`, `[topic].astro` for sub-topic SEO pages, `worksheets.astro` for printables.
 
