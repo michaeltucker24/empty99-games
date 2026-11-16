@@ -12,7 +12,8 @@ const canonical = new URL(path, Astro.site).href;
 const parts = path.split('/').filter(Boolean);
 const ogPath = parts.length ? `/${parts[0]}/og/${parts.slice(1).join('-') || 'index'}.png` : '';
 const ogImage = ogPath ? new URL(ogPath, Astro.site).href : '';
-const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+// PostHog public project key (same project as the studio site; public by design). Override with PUBLIC_POSTHOG_KEY.
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY ?? 'phc_mLhMe8f9e3saAp8u75KSkexBVBVFntrH87fyESj4TD4j';
 ---
 <!doctype html>
 <html lang="en">
