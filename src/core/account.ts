@@ -1,6 +1,6 @@
 // Optional player accounts (Supabase). Accounts are opt-in: the game works fully
 // without one, and the Supabase library only loads once a player starts saving
-// or already has a saved session. Email sign-in uses a 6-digit code typed into
+// or already has a saved session. Email sign-in uses a one-time code typed into
 // the game (works even when the email opens on another device).
 
 import type { SupabaseClient } from '@supabase/supabase-js';

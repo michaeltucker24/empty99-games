@@ -266,7 +266,7 @@ export function SaveProgressSheet({
                 autoFocus
               />
             </label>
-            <p className="hint">We'll email you a 6-digit code. No password needed. Already saved on another device? Use the same email.</p>
+            <p className="hint">We'll email you a sign-in code. No password needed. Already saved on another device? Use the same email.</p>
             {error && <p className="field-error">{error}</p>}
             <button className="btn primary block" type="submit" disabled={busy}>
               {busy ? 'Sending…' : 'Send my code'}
@@ -287,7 +287,7 @@ export function SaveProgressSheet({
               <input
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                placeholder="123456"
+                placeholder="12345678"
                 maxLength={8}
                 value={code}
                 onChange={(e) => (setCode(e.target.value.replace(/\D/g, '')), setError(''))}
