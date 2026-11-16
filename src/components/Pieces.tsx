@@ -6,7 +6,7 @@ import { MAX_HEAT, stageFor, type HeatState } from '../core/heat';
 export function Keypad({ onKey }: { onKey: (k: string) => void }) {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', '0', 'back'];
   return (
-    <div className="keypad optional" role="group" aria-label="Number keypad">
+    <div className="keypad" role="group" aria-label="Number keypad">
       {keys.map((k) => (
         <button
           key={k}
@@ -47,7 +47,7 @@ export function HeatMeter({ heat, flashKind, flashId }: { heat: HeatState; flash
         <div className="heat-fill" style={{ width: `${(heat.heat / MAX_HEAT) * 100}%`, backgroundColor: stage.color }} />
       </div>
       <div className="heat-row">
-        <span>🔥 Heat: problems get harder as you streak</span>
+        <span>🔥 Heat · harder as you streak</span>
         <span className={`heat-name ${cls}`} style={{ color: stage.color, display: 'inline-block' }}>
           {stage.name}
         </span>

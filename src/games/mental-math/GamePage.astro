@@ -1,0 +1,66 @@
+---
+// One template for the hub and every sub-topic page: game on top, SEO text below, "Try next" links.
+import Base from '../../layouts/Base.astro';
+import MentalMathApp from './MentalMathApp';
+import { PAGES, type PageContent } from './content';
+
+interface Props { page: PageContent }
+const { page } = Astro.props;
+const path = page.slug ? `/mental-math/${page.slug}` : '/mental-math';
+const siblings = PAGES.filter((p) => p.slug !== page.slug);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: page.h1,
+      url: new URL(path, Astro.site).href,
+      applicationCategory: 'EducationalApplication',
+      operatingSystem: 'Any',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@type': 'Organization', name: 'Empty 99 Studios', url: 'https://empty99studios.com' },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: page.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    },
+  ],
+};
+---
+<Base title={page.title} description={page.description} path={path} jsonLd={jsonLd}>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    {page.slug ? <a href="/mental-math">Mental Math Sprint</a> : null}
+  </nav>
+  <h1>{page.h1}</h1>
+  <p style="margin-top:0">{page.intro}</p>
+
+  <MentalMathApp client:only="react" topic={page.topic} />
+
+  <section class="content">
+    <h2>How it works</h2>
+    <ol>{page.how.map((h) => <li>{h}</li>)}</ol>
+    <h2>Tips to get faster</h2>
+    <ul>{page.tips.map((t) => <li>{t}</li>)}</ul>
+    <h2>Questions</h2>
+    <div class="faq">
+      {page.faq.map((f) => (
+        <details>
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+    <h2>Printable worksheets</h2>
+    <p><a href="/mental-math/worksheets">Free printable worksheets</a> with new numbers every time and an answer key.</p>
+  </section>
+
+  <h2>Try next</h2>
+  <div class="trynext">
+    {siblings.map((s) => (
+      <a href={s.slug ? `/mental-math/${s.slug}` : '/mental-math'}>
+        {s.h1}
+        <span>{s.intro.split('. ')[0]}.</span>
+      </a>
+    ))}
+  </div>
+</Base>

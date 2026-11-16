@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+interface Props {
+  title: string;
+  description: string;
+  path: string; // e.g. "/mental-math/percentages"
+  jsonLd?: Record<string, unknown>;
+}
+const { title, description, path, jsonLd } = Astro.props;
+const canonical = new URL(path, Astro.site).href;
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title} | Empty 99 Studios</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#FFD23F" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Empty 99 Studios" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/mental-math/favicon.svg" type="image/svg+xml" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {posthogKey && (
+      <script is:inline define:vars={{ posthogKey }}>
+        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        posthog.init(posthogKey, { api_host: 'https://us.i.posthog.com', persistence: 'memory', autocapture: false });
+      </script>
+    )}
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="logo" href="https://empty99studios.com" aria-label="Empty 99 Studios home">EMPTY <b>99</b> STUDIOS</a>
+      <a class="btn small" href="https://empty99studios.com/#games">More games</a>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer>
+      © {new Date().getFullYear()} Empty 99 Studios · Free to play, no sign-up ·
+      <a href="https://empty99studios.com/#privacy">Privacy</a><br />
+      Progress is stored only in your browser. Analytics run without cookies.
+    </footer>
+  </body>
+</html>

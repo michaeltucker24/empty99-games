@@ -1,0 +1,10 @@
+---
+import GamePage from '../../games/mental-math/GamePage.astro';
+import { PAGES } from '../../games/mental-math/content';
+
+export function getStaticPaths() {
+  return PAGES.filter((p) => p.slug).map((page) => ({ params: { topic: page.slug }, props: { page } }));
+}
+const { page } = Astro.props;
+---
+<GamePage page={page} />

@@ -1,0 +1,19 @@
+name: Weekly live-site scan
+
+on:
+  schedule:
+    - cron: '17 3 * * 1' # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: https://empty99studios.com/mental-math
+          allow_issue_writing: true

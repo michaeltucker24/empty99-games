@@ -7,6 +7,6 @@ export default defineConfig({
   site: 'https://empty99studios.com',
   output: 'static',
   trailingSlash: 'never',
-  build: { format: 'directory' },
+  build: { format: 'directory', assets: '_games' },
   integrations: [react()],
 });

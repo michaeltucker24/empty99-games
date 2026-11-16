@@ -1,0 +1,15 @@
+{
+  // Static games app on Cloudflare Workers (static assets only, no server code yet).
+  "name": "empty99-games",
+  "compatibility_date": "2026-11-16",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash"
+  },
+  // empty99studios.com/ stays on the studio site; only game paths come here.
+  "routes": [
+    { "pattern": "empty99studios.com/mental-math*", "zone_name": "empty99studios.com" },
+    { "pattern": "empty99studios.com/_games/*", "zone_name": "empty99studios.com" }
+  ]
+}

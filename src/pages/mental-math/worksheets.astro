@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import Worksheet from '../../games/mental-math/Worksheet';
+---
+<Base
+  title="Free printable mental math worksheets with answer keys"
+  description="Printable math worksheets for teens and adults: addition, subtraction, multiplication, division, percentages and real-life money math. New numbers every time, answer key included."
+  path="/mental-math/worksheets"
+>
+  <nav class="crumbs no-print"><a href="/mental-math">Mental Math Sprint</a></nav>
+  <h1 class="no-print">Printable math worksheets</h1>
+  <p class="no-print" style="margin-top:0">Pick a topic and difficulty, then print or save as PDF. Every click on "New numbers" makes a fresh sheet. The answer key prints on page 2.</p>
+  <Worksheet client:only="react" />
+  <section class="content no-print">
+    <h2>Practice it as a game</h2>
+    <p>Prefer a timer? Play <a href="/mental-math">Mental Math Sprint</a>: a 60-second daily challenge with streaks and badges.</p>
+  </section>
+</Base>
