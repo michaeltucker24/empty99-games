@@ -1,7 +1,7 @@
 // Mental Math Sprint: tabs (Path, Play, Missions, Shop, Profile), onboarding,
 // modes, flight path stages, session, results. Progression lives in core/.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Problem } from '../../core/contract';
 import { dayNumber, todayKey } from '../../core/seed';
 import { stageFor } from '../../core/heat';
@@ -48,6 +48,8 @@ import { Bar, StatBar, TabBar, type Stat, type Tab } from '../../components/Chro
 import { Glyph, Icon } from '../../components/Icons';
 import { Rocket } from '../../components/Rocket';
 import { LevelBar, MissionsPanel, PathPanel, RewardStrip, ShopPanel } from '../../components/ProgressionPanels';
+import { AccountCard, SaveProgressSheet, useAccount } from '../../components/Account';
+import { ageStatus, markPromptShown, shouldPromptSave, snoozePrompt, type Account } from '../../core/account';
 import { Launch, type RoundResult } from './modes/Launch';
 import { Defuse } from './modes/Defuse';
 import { RealLife } from './modes/RealLife';
@@ -161,10 +163,23 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
     return () => clearInterval(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const commit = (p: Progress) => {
+  const commit = useCallback((p: Progress) => {
     setProgress(p);
     saveProgress(GAME, p);
-  };
+  }, []);
+  const acct = useAccount(GAME, progress, commit);
+  const [saveSheet, setSaveSheet] = useState<'pitch' | 'email' | null>(null);
+
+  // After a round, offer to save progress once there's something worth keeping.
+  useEffect(() => {
+    if (screen.name !== 'result' || !acct.enabled || acct.account || ageStatus() === 'under') return;
+    if (!shouldPromptSave(progress, levelInfo(progress.xp).level)) return;
+    const t = setTimeout(() => {
+      markPromptShown();
+      setSaveSheet('pitch');
+    }, 1400);
+    return () => clearTimeout(t);
+  }, [screen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const missesOf = (ps: Problem[]) => ps.map((m) => ({ prompt: m.prompt, answer: m.answer, topic: m.topic }));
 
@@ -704,7 +719,24 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
       case 'shop':
         return <ShopPanel progress={progress} onBuy={onBuy} now={now} />;
       case 'profile':
-        return <ProfileTab progress={progress} streak={streak} onHow={() => setScreen({ name: 'onboard' })} />;
+        return (
+          <ProfileTab
+            progress={progress}
+            streak={streak}
+            onHow={() => setScreen({ name: 'onboard' })}
+            account={
+              acct.enabled ? (
+                <AccountCard
+                  account={acct.account}
+                  syncing={acct.syncing}
+                  onSave={() => setSaveSheet('email')}
+                  onSignOut={() => acct.signOut().then(() => showToast('Signed out. Progress stays in this browser.'))}
+                  onDelete={acct.deleteAccount}
+                />
+              ) : null
+            }
+          />
+        );
       default:
         return (
           <PathPanel
@@ -741,6 +773,18 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
         body
       )}
       {sharing && <ShareMenu data={sharing} onClose={() => setSharing(null)} toast={showToast} />}
+      {saveSheet && (
+        <SaveProgressSheet
+          start={saveSheet}
+          onClose={() => setSaveSheet(null)}
+          onSnooze={() => {
+            snoozePrompt();
+            setSaveSheet(null);
+          }}
+          onSignedIn={(a: Account) => acct.onSignedIn(a)}
+          onNickname={acct.setNickname}
+        />
+      )}
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
@@ -828,7 +872,7 @@ function PlayTab({
   );
 }
 
-function ProfileTab({ progress, streak, onHow }: { progress: Progress; streak: number; onHow: () => void }) {
+function ProfileTab({ progress, streak, onHow, account }: { progress: Progress; streak: number; onHow: () => void; account: React.ReactNode }) {
   const totalStages = SECTORS.reduce((n, s) => n + s.stages.length, 0);
   const cleared = SECTORS.reduce((n, s) => n + sectorDone(s, progress), 0);
   const got = Object.keys(BADGES).filter((id) => progress.badges.includes(id)).length;
@@ -847,7 +891,8 @@ function ProfileTab({ progress, streak, onHow }: { progress: Progress; streak: n
         </div>
       </div>
       <LevelBar xp={progress.xp} />
-      <div className="logrid">
+      {account}
+      <div className="logrid" style={{ marginTop: account ? 14 : 0 }}>
         <div className="logcell">
           <span style={{ color: 'var(--streak)' }}>
             <Icon name="flame" size={24} />
@@ -905,7 +950,7 @@ function ProfileTab({ progress, streak, onHow }: { progress: Progress; streak: n
           );
         })}
       </div>
-      <p className="device-note">Your progress is saved on this device. Sign-in to keep it everywhere is coming later.</p>
+      {!account && <p className="device-note">Your progress is saved on this device.</p>}
       <button className="linkbtn" onClick={onHow}>
         How it works
       </button>
