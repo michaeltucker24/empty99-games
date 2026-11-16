@@ -21,5 +21,8 @@ Plan and decisions live in the Empty 99 Studios claude.ai project: `claude/learn
 - Every game emits the same analytics events (`round_start`, `round_end`, `share_click`, `return_visit`, `quiz_end`, `printable_made`).
 - Standard page format per game: mini-game modes, heat-meter difficulty, rewards, sub-topic pages, quizzes + flashcards, printables. Embeds later.
 
+## Social preview images
+After adding or renaming pages: `npm run build && python3 scripts/make_og.py && npm run build`, then commit `public/<game>/og/*.png`. Add a per-page badge in `BADGES` in the script.
+
 ## Commands
 `npm run dev` · `npm test` · `npm run check` · `npm run build` · `npm run deploy` (needs Cloudflare login)

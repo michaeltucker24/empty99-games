@@ -6,7 +6,6 @@ import { dayNumber, todayKey } from '../../core/seed';
 import { stageFor } from '../../core/heat';
 import { readJSON, writeJSON } from '../../core/storage';
 import { track } from '../../core/analytics';
-import { downloadCard, shareText } from '../../core/share';
 import { isMuted, setMuted, sfx } from '../../core/sound';
 import {
   addMisses,
@@ -20,6 +19,7 @@ import {
   type Progress,
 } from '../../core/progress';
 import { Confetti, Keypad } from '../../components/Pieces';
+import { ShareMenu, type ShareData } from '../../components/ShareMenu';
 import { useRound } from '../../components/useRound';
 import { Launch, type RoundResult } from './modes/Launch';
 import { Defuse } from './modes/Defuse';
@@ -30,6 +30,8 @@ import { mentalMath, TOPICS } from './logic';
 
 const GAME = 'mental-math';
 const URL_BASE = 'empty99studios.com/mental-math';
+const pageUrl = () =>
+  (document.querySelector('link[rel=canonical]') as HTMLLinkElement | null)?.href ?? `https://${URL_BASE}`;
 
 type Screen =
   | { name: 'home' }
@@ -65,6 +67,11 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
   const [screen, setScreen] = useState<Screen>({ name: 'home' });
   const [muted, setMutedState] = useState(false);
   const [toast, setToast] = useState('');
+  const [sharing, setSharing] = useState<ShareData | null>(null);
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2600);
+  };
   const topicInfo = TOPICS.find((t) => t.id === topic) ?? TOPICS[0];
   const day = dayNumber();
   const today = todayKey();
@@ -314,7 +321,7 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
                     { n: `${b.progress.bests[`quiz-${topic}`] ?? score}/10`, l: 'best' },
                   ],
                   earned: a.earned,
-                  best: b.isBest,
+                  best: b.isBest && score >= 6,
                   share: `I scored ${score}/10 on the ${topicInfo.name} mental math quiz 📝`,
                   card: { title: `${topicInfo.name} quiz`, big: `${score}/10`, sub: 'Mental Math Sprint' },
                   again: { name: 'quiz' },
@@ -332,13 +339,15 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
             r={screen.r}
             onAgain={() => setScreen(screen.r.again)}
             onHome={back}
-            onShare={async () => {
-              track(GAME, 'share_click', { title: screen.r.title });
-              const res = await shareText(screen.r.share, `https://${URL_BASE}`);
-              setToast(res === 'copied' ? 'Copied! Paste it anywhere.' : res === 'shared' ? 'Shared!' : 'Could not share');
-              setTimeout(() => setToast(''), 2200);
-            }}
-            onCard={() => downloadCard({ ...screen.r.card, accent: mentalMath.accent, footer: URL_BASE }, 'mental-math-score.png')}
+            onShare={() =>
+              setSharing({
+                game: GAME,
+                text: screen.r.share,
+                url: pageUrl(),
+                card: { ...screen.r.card, accent: mentalMath.accent, footer: URL_BASE },
+                fileName: 'mental-math-score.png',
+              })
+            }
           />
         );
       default:
@@ -378,6 +387,7 @@ export default function MentalMathApp({ topic = 'mixed' }: { topic?: string }) {
         </button>
       </div>
       {body}
+      {sharing && <ShareMenu data={sharing} onClose={() => setSharing(null)} toast={showToast} />}
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
@@ -506,7 +516,7 @@ function PracticeSetup({ topicName, onPick, onBack }: { topicName: string; onPic
   );
 }
 
-function Result({ r, onAgain, onHome, onShare, onCard }: { r: ResultView; onAgain: () => void; onHome: () => void; onShare: () => void; onCard: () => void }) {
+function Result({ r, onAgain, onHome, onShare }: { r: ResultView; onAgain: () => void; onHome: () => void; onShare: () => void }) {
   return (
     <div className="stage result" style={{ position: 'relative' }}>
       <Confetti go={r.best || r.earned.length > 0} />
@@ -535,9 +545,6 @@ function Result({ r, onAgain, onHome, onShare, onCard }: { r: ResultView; onAgai
       <div className="cards">
         <button className="btn yellow block" onClick={onShare}>
           📤 Share score
-        </button>
-        <button className="btn block" onClick={onCard}>
-          🖼️ Save story image
         </button>
         <button className="btn primary block" onClick={onAgain}>
           {r.againLabel}
