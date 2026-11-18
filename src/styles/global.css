@@ -191,7 +191,7 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
 .sheet-name { font-size: 13px; align-self: flex-end; }
 .sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 18px; padding-left: 22px; margin: 0; font-size: 17px; font-variant-numeric: tabular-nums; }
 .sheet-grid.wide { grid-template-columns: 1fr; font-size: 14px; }
-.sheet-grid.key { font-size: 14px; gap: 6px 18px; }
+.sheet-grid.answers { font-size: 14px; gap: 6px 18px; }
 .blank { display: inline-block; width: 60px; border-bottom: 1.5px solid #000; }
 .sheet-foot { margin-top: 16px; font-size: 11px; color: #777; text-align: right; }
 @media (max-width: 520px) { .sheet-grid { grid-template-columns: repeat(2, 1fr); } }

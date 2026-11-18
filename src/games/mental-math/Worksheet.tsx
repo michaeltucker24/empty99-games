@@ -84,7 +84,7 @@ export default function Worksheet({ initialTopic = 'mixed' }: { initialTopic?: s
         <div className="sheet-head">
           <strong>Answer key: {topicName}</strong>
         </div>
-        <ol className="sheet-grid key">
+        <ol className="sheet-grid answers">
           {problems.map((p, i) => (
             <li key={i}>
               {money ? `$${p.answer}` : `${p.prompt} = ${p.answer}`}
